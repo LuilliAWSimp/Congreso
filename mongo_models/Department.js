@@ -1,10 +1,13 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose');
 
-// Definir el esquema del departamento
-const departmentSchema = new Schema({
-  nombre: { type: String, required: true },
+const departmentSchema = new mongoose.Schema({
+  nombre: {
+    type: String,
+    required: true,
+    unique: true,
+  },
 });
 
-const Department = mongoose.model("Department", departmentSchema);
+const Department = mongoose.model('Department', departmentSchema);
+
 module.exports = Department;

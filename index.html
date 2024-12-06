@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pruebas Frontend</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    input, button {
+      margin: 5px 0;
+      padding: 10px;
+      width: 100%;
+      max-width: 300px;
+    }
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pruebas del Sistema</h1>
+  
+  <!-- Login -->
+  <h2>Iniciar Sesión</h2>
+  <form id="loginForm">
+    <input type="text" id="username" placeholder="Username o Email" required />
+    <input type="password" id="password" placeholder="Contraseña" required />
+    <button type="submit">Iniciar Sesión</button>
+  </form>
+  
+  <!-- Crear Usuario -->
+  <h2>Crear Usuario (Admin)</h2>
+  <form id="createUserForm">
+    <input type="text" id="nombre" placeholder="Nombre" required />
+    <input type="text" id="usernameUser" placeholder="Username" required />
+    <input type="password" id="passwordUser" placeholder="Contraseña" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="text" id="departamento" placeholder="Departamento" required />
+    <button type="submit">Crear Usuario</button>
+  </form>
+
+  <!-- Respuesta del Servidor -->
+  <div class="response" id="response"></div>
+
+  <script>
+    const API_URL = "http://localhost:3000/api"; // Cambiar según el entorno
+    let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NDUyM2RjN2E2NDZjMmQ4MWU3Y2FkNyIsInRpcG8iOiJhZG1pbmlzdHJhZG9yIiwiaWF0IjoxNzMyNTg1MTEzLCJleHAiOjE3MzI1ODg3MTN9.GDWU2Ta5A8MRkWyaVjrRGqzKvPLhCgKLehL8AxRQqIo";
+
+    // Login
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          token = data.token;
+          document.getElementById("response").innerText = `Login exitoso. Token: ${token}`;
+        } else {
+          document.getElementById("response").innerText = `Error: ${data.error}`;
+        }
+      } catch (error) {
+        document.getElementById("response").innerText = `Error de conexión: ${error.message}`;
+      }
+    });
+
+    // Crear Usuario
+    document.getElementById("createUserForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const nombre = document.getElementById("nombre").value;
+      const username = document.getElementById("usernameUser").value;
+      const password = document.getElementById("passwordUser").value;
+      const email = document.getElementById("email").value;
+      const departamento = document.getElementById("departamento").value;
+
+      try {
+        const response = await fetch(`${API_URL}/users`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({ nombre, username, password, email, departamento, tipo: "normal" }),
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById("response").innerText = `Usuario creado: ${JSON.stringify(data)}`;
+        } else {
+          document.getElementById("response").innerText = `Error: ${data.error}`;
+        }
+      } catch (error) {
+        document.getElementById("response").innerText = `Error de conexión: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>

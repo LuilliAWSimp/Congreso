@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentos por Departamento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .departamento {
+            cursor: pointer;
+            margin: 10px 0;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .documentos {
+            display: none;
+            margin-left: 20px;
+        }
+        .documento {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Departamentos y Documentos</h1>
+    <div id="departamentos"></div>
+
+    <script>
+        // Función para obtener y mostrar los departamentos
+        async function cargarDepartamentos() {
+            const res = await fetch('/api/departments'); // Ruta correcta para obtener departamentos
+            const data = await res.json();
+
+            if (data && data.length > 0) {
+                const departamentosDiv = document.getElementById('departamentos');
+                departamentosDiv.innerHTML = '';
+
+                data.forEach(departamento => {
+                    const deptDiv = document.createElement('div');
+                    deptDiv.classList.add('departamento');
+                    deptDiv.textContent = departamento;
+
+                    // Evento para mostrar documentos cuando se hace clic
+                    deptDiv.addEventListener('click', () => cargarDocumentos(departamento));
+
+                    departamentosDiv.appendChild(deptDiv);
+                });
+            } else {
+                document.getElementById('departamentos').innerHTML = 'No hay departamentos disponibles.';
+            }
+        }
+
+        // Función para obtener y mostrar los documentos de un departamento
+        async function cargarDocumentos(departamento) {
+            const res = await fetch(`/api/uploads/${departamento}`); // Ruta correcta para obtener documentos por departamento
+            const data = await res.json();
+
+            const deptDiv = document.querySelector(`div[data-departamento="${departamento}"]`);
+            let documentosDiv = deptDiv.querySelector('.documentos');
+
+            // Si no existe el contenedor de documentos, lo creamos
+            if (!documentosDiv) {
+                documentosDiv = document.createElement('div');
+                documentosDiv.classList.add('documentos');
+                deptDiv.appendChild(documentosDiv);
+            }
+
+            // Limpiar cualquier contenido previo
+            documentosDiv.innerHTML = '';
+
+            if (data.archivos && data.archivos.length > 0) {
+                data.archivos.forEach(archivo => {
+                    const docDiv = document.createElement('div');
+                    docDiv.classList.add('documento');
+                    docDiv.textContent = archivo;
+
+                    // Link para descargar el archivo
+                    const link = document.createElement('a');
+                    link.href = `/uploads/${archivo}`;
+                    link.textContent = ' Descargar';
+                    link.target = '_blank'; // Abrir en nueva pestaña
+                    docDiv.appendChild(link);
+
+                    documentosDiv.appendChild(docDiv);
+                });
+
+                // Mostrar los documentos
+                documentosDiv.style.display = 'block';
+            } else {
+                documentosDiv.innerHTML = 'No hay documentos disponibles en este departamento.';
+            }
+        }
+
+        // Cargar departamentos al iniciar
+        cargarDepartamentos();
+    </script>
+</body>
+</html>
